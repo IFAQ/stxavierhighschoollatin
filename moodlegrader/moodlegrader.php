@@ -1,35 +1,77 @@
 <?php
 
 $passingScore = 8;
-$passesNeeded = 5;
+$onePointMax = 10;
+$tenthPointMax = 10.5;
 
-/*
-$fileToRead = "~/Users/jimmie/Documents/Scripts/quizresults.csv";
+$fileToRead = "quizresults.csv";
+$fileToWrite = "graderesults.csv";
 
-$handle = fopen($fileToRead, 'r');
+$readHandle = fopen($fileToRead, 'r');
+$writeHandle = fopen($fileToWrite, 'w');
 
-$data = fgetcsv($handle, 1000);
-*/
+$currentStudentFirstName = null;
+$currentStudentLastName = null;
 
-$students = array(
-    'Student 1' => array(5,8,9,10,10,8,7,9),
-    'Student 2' => array(2,3,10,7,8,7,9),
-    'Student 3' => array(4,6,10,7,8,9,9,9,9)
-);
+$headerRow = null;
 
-foreach($students as $name => $scores)
+while($row = fgetcsv($readHandle))
 {
-    $passCounter = 0;
-    
-    foreach($scores as $score)
+    if(!$headerRow)
     {
-        if($score >= $passingScore)
-        {
-            $passCounter++;
-        }
+        $headerRow = array(
+            'Last Name',
+            'First Name',
+            'Passing Scores',
+            'Daily Points'
+        );
+        
+        fputcsv($writeHandle, $headerRow);
+        
+        continue;
     }
     
-    echo $name.': '.$passCounter.'/n';
+    if($currentStudentFirstName !== $row[1] || $currentStudentLastName !== $row[0])
+    {
+        if($currentStudentFirstName)
+        {
+            $numberOfPassingGrades = $passCounter;
+            
+            while($dailyPoints < $onePointMax && $passCounter > 0)
+            {
+                $dailyPoints++;
+                
+                $passCounter--;
+            }
+            
+            while($dailyPoints < $tenthPointMax && $passCounter > 0)
+            {
+                $dailyPoints = $dailyPoints + .1;
+                
+                $passCounter--;
+            }
+            
+            fputcsv($writeHandle,
+                array(
+                    $currentStudentLastName,
+                    $currentStudentFirstName,
+                    $numberOfPassingGrades,
+                    $dailyPoints
+                )
+            );
+        }
+        
+        $currentStudentFirstName = $row[1];
+        $currentStudentLastName = $row[0];
+        $passCounter = 0;
+        $dailyPoints = 0;
+    }
+    
+    if($row[9] >= $passingScore)
+    {
+        $passCounter++;
+    }
 }
+
 
 ?>
