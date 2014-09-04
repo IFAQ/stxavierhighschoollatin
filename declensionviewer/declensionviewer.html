@@ -1,0 +1,790 @@
+<html>
+<head>
+    
+</head>
+
+<body onload="bodyLoaded();">
+
+<select id="display" onChange="ND.setDisplay(this.value)">
+    <option value="">Display endings by:</option>
+    <option value="declension">Declension</option>
+    <option value="case">Case</option>
+    <option value="number">Number</option>
+</select>
+
+<select id="declension" onChange="ND.showDeclensionData(this.value);" disabled="true">
+    <option value="">Declension:</option>
+    <option value="1">1</option>
+    <option value="2">2</option>
+    <option value="3">3</option>
+    <option value="4">4</option>
+    <option value="5">5</option>
+</select>
+
+<select id="case" onChange="ND.showCaseData(this.value);" disabled="true">
+    <option value="">Case:</option>
+    <option value="nominative">Nominative</option>
+    <option value="genitive">Genitive</option>
+    <option value="dative">Dative</option>
+    <option value="accusative">Accusative</option>
+    <option value="ablative">Ablative</option>
+</select>
+
+<select id="number" onChange="ND.showNumberData(this.value)" disabled="true">
+    <option value="">Number:</option>
+    <option value="singular">Singular</option>
+    <option value="plural">Plural</option>
+</select>
+
+<table id="displaytable">
+</table>
+
+<div id="displayinfo" style="margin-top:20px;">
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    function bodyLoaded()
+    {
+        ND = {};
+        
+        ND.buildTable = function(tableInfo)
+        {
+            this.clearTable();
+            
+            //build the label row
+            var labelRow = document.createElement('tr');
+            var blankLabelCell = document.createElement('th');
+            blankLabelCell.innerHTML = '';
+            labelRow.appendChild(blankLabelCell);
+            
+            for(var i=0; i<tableInfo.Columns.length; i++)
+            {
+                var labelCell = document.createElement('th');
+                labelCell.style.textAlign = 'left';
+                labelCell.style.paddingLeft = '30px';
+                labelCell.innerHTML = tableInfo.Columns[i].DisplayName;
+                labelRow.appendChild(labelCell);
+            }
+            
+            this.DisplayTable.appendChild(labelRow);
+            
+            //build the data rows
+            for(var i=0; i<tableInfo.Rows.length; i++)
+            {
+                var dataRow = document.createElement('tr');
+                
+                var rowLabelCell = document.createElement('th');
+                rowLabelCell.style.textAlign = 'right';
+                rowLabelCell.innerHTML = tableInfo.Rows[i].Label;
+                dataRow.appendChild(rowLabelCell);
+                
+                for(var j=0; j<tableInfo.Rows[i].Data.length; j++)
+                {
+                    var rowCell = document.createElement('td');
+                    rowCell.style.paddingLeft = '30px';
+                    rowCell.innerHTML = tableInfo.Rows[i].Data[j];
+                    dataRow.appendChild(rowCell);
+                }
+                
+                this.DisplayTable.appendChild(dataRow);
+            }
+        };
+        
+        ND.Cases = [
+            {
+                DisplayName: 'Nominative',
+                ProgrammingName: 'nominative',
+                Notes: [
+                    'Usage: <ul><li>Subject</li><li>predicate nominative</li></ul>',
+                    "The word 'nomen' means 'name'"
+                ]
+            },
+            {
+                DisplayName: 'Genitive',
+                ProgrammingName: 'genitive',
+                Notes: [
+                    'Usage: <ul><li>Possession</li><li>Partitive genitive</li><li>Description</li></ul>',
+                    "'Genitive' is derived from 'genus', which means 'type'"
+                ]
+            },
+            {
+                DisplayName: 'Dative',
+                ProgrammingName: 'dative',
+                Notes: []
+            },
+            {
+                DisplayName: 'Accusative',
+                ProgrammingName: 'accusative',
+                Notes: []
+            },
+            {
+                DisplayName: 'Ablative',
+                ProgrammingName: 'ablative',
+                Notes: []
+            }
+        ];
+        
+        ND.clearTable = function()
+        {
+            while(this.DisplayTable.firstChild)
+            {
+                this.DisplayTable.removeChild(this.DisplayTable.firstChild);
+            }
+        };
+        
+        ND.Data = [
+            {
+                Endings: ['a'],
+                D: '1',
+                C: 'nominative',
+                N: 'singular'
+            },
+            {
+                Endings: ['ae'],
+                D: '1',
+                C: 'genitive',
+                N: 'singular'
+            },
+            {
+                Endings: ['ae'],
+                D: '1',
+                C: 'dative',
+                N: 'singular'
+            },
+            {
+                Endings: ['am'],
+                D: '1',
+                C: 'accusative',
+                N: 'singular'
+            },
+            {
+                Endings: ['a&#772;'],
+                D: '1',
+                C: 'ablative',
+                N: 'singular'
+            },
+            {
+                Endings: ['ae'],
+                D: '1',
+                C: 'nominative',
+                N: 'plural'
+            },
+            {
+                Endings: ['a&#772;rum'],
+                D: '1',
+                C: 'genitive',
+                N: 'plural'
+            },
+            {
+                Endings: ['i&#772;s'],
+                D: '1',
+                C: 'dative',
+                N: 'plural'
+            },
+            {
+                Endings: ['a&#772;s'],
+                D: '1',
+                C: 'accusative',
+                N: 'plural'
+            },
+            {
+                Endings: ['i&#772;s'],
+                D: '1',
+                C: 'ablative',
+                N: 'plural'
+            },
+            {
+                Endings: ['us', '(e)r', 'um'],
+                D: '2',
+                C: 'nominative',
+                N: 'singular'
+            },
+            {
+                Endings: ['i&#772;'],
+                D: '2',
+                C: 'genitive',
+                N: 'singular'
+            },
+            {
+                Endings: ['o&#772;'],
+                D: '2',
+                C: 'dative',
+                N: 'singular'
+            },
+            {
+                Endings: ['um'],
+                D: '2',
+                C: 'accusative',
+                N: 'singular'
+            },
+            {
+                Endings: ['o&#772;'],
+                D: '2',
+                C: 'ablative',
+                N: 'singular'
+            },
+            {
+                Endings: ['i&#772;', 'a'],
+                D: '2',
+                C: 'nominative',
+                N: 'plural'
+            },
+            {
+                Endings: ['o&#772;rum'],
+                D: '2',
+                C: 'genitive',
+                N: 'plural'
+            },
+            {
+                Endings: ['i&#772;s'],
+                D: '2',
+                C: 'dative',
+                N: 'plural'
+            },
+            {
+                Endings: ['o&#772;s', 'a'],
+                D: '2',
+                C: 'accusative',
+                N: 'plural'
+            },
+            {
+                Endings: ['i&#772;s'],
+                D: '2',
+                C: 'ablative',
+                N: 'plural'
+            },
+            {
+                Endings: ['is', 'e&#772;s', 'e', 'al', 'ar'],
+                D: '3',
+                C: 'nominative',
+                N: 'singular'
+            },
+            {
+                Endings: ['is'],
+                D: '3',
+                C: 'genitive',
+                N: 'singular'
+            },
+            {
+                Endings: ['i&#772;'],
+                D: '3',
+                C: 'dative',
+                N: 'singular'
+            },
+            {
+                Endings: ['em', 'e', 'el', 'ar'],
+                D: '3',
+                C: 'accusative',
+                N: 'singular'
+            },
+            {
+                Endings: ['e', 'i&#772;'],
+                D: '3',
+                C: 'ablative',
+                N: 'singular'
+            },
+            {
+                Endings: ['e&#772;s', 'a', 'ia'],
+                D: '3',
+                C: 'nominative',
+                N: 'plural'
+            },
+            {
+                Endings: ['um', 'ium'],
+                D: '3',
+                C: 'genitive',
+                N: 'plural'
+            },
+            {
+                Endings: ['ibus'],
+                D: '3',
+                C: 'dative',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;s', 'a', 'ia'],
+                D: '3',
+                C: 'accusative',
+                N: 'plural'
+            },
+            {
+                Endings: ['ibus'],
+                D: '3',
+                C: 'ablative',
+                N: 'plural'
+            },
+            {
+                Endings: ['us', 'u&#772;'],
+                D: '4',
+                C: 'nominative',
+                N: 'singular'
+            },
+            {
+                Endings: ['u&#772;s'],
+                D: '4',
+                C: 'genitive',
+                N: 'singular'
+            },
+            {
+                Endings: ['ui&#772;', 'u&#772;'],
+                D: '4',
+                C: 'dative',
+                N: 'singular'
+            },
+            {
+                Endings: ['um', 'u&#772;'],
+                D: '4',
+                C: 'accusative',
+                N: 'singular'
+            },
+            {
+                Endings: ['u&#772;'],
+                D: '4',
+                C: 'ablative',
+                N: 'singular'
+            },
+            {
+                Endings: ['u&#772;s', 'ua'],
+                D: '4',
+                C: 'nominative',
+                N: 'plural'
+            },
+            {
+                Endings: ['uum'],
+                D: '4',
+                C: 'genitive',
+                N: 'plural'
+            },
+            {
+                Endings: ['ibus'],
+                D: '4',
+                C: 'dative',
+                N: 'plural'
+            },
+            {
+                Endings: ['u&#772;s', 'ua'],
+                D: '4',
+                C: 'accusative',
+                N: 'plural'
+            },
+            {
+                Endings: ['ibus'],
+                D: '4',
+                C: 'ablative',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;'],
+                D: '5',
+                C: 'nominative',
+                N: 'singular'
+            },
+            {
+                Endings: ['e&#772;i&#772;', 'ei&#772;'],
+                D: '5',
+                C: 'genitive',
+                N: 'singular'
+            },
+            {
+                Endings: ['e&#772;i&#772;', 'ei&#772;'],
+                D: '5',
+                C: 'dative',
+                N: 'singular'
+            },
+            {
+                Endings: ['em'],
+                D: '5',
+                C: 'accusative',
+                N: 'singular'
+            },
+            {
+                Endings: ['e&#772;'],
+                D: '5',
+                C: 'ablative',
+                N: 'singular'
+            },
+            {
+                Endings: ['e&#772;s'],
+                D: '5',
+                C: 'nominative',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;rum'],
+                D: '5',
+                C: 'genitive',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;bus'],
+                D: '5',
+                C: 'dative',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;s'],
+                D: '5',
+                C: 'accusative',
+                N: 'plural'
+            },
+            {
+                Endings: ['e&#772;bus'],
+                D: '5',
+                C: 'ablative',
+                N: 'plural'
+            }
+        ];
+        
+        ND.Declensions = [
+            {
+                DisplayName: 'First',
+                ProgrammingName: '1',
+                Notes: []
+            },
+            {
+                DisplayName: 'Second',
+                ProgrammingName: '2',
+                Notes: []
+            },
+            {
+                DisplayName: 'Third',
+                ProgrammingName: '3',
+                Notes: []
+            },
+            {
+                DisplayName: 'Fourth',
+                ProgrammingName: '4',
+                Notes: []
+            },
+            {
+                DisplayName: 'Fifth',
+                ProgrammingName: '5',
+                Notes: []
+            }
+        ];
+        
+        ND.DisplayInfoDiv = document.getElementById('displayinfo');
+        
+        ND.DisplayTable = document.getElementById('displaytable');
+        
+        ND.filterDataOnSingleCoordinate = function(coord, v)
+        {
+            var result = [];
+            
+            for(var i=0; i<this.Data.length; i++)
+            {
+                var ending = this.Data[i];
+                
+                if(ending[coord] == v)
+                {
+                    result.push(ending);
+                }
+            }
+            
+            return result;
+        };
+        
+        ND.getDeclensionData = function(v)
+        {
+            return this.filterDataOnSingleCoordinate('D', v);
+        };
+        
+        ND.getCaseData = function(v)
+        {
+            return this.filterDataOnSingleCoordinate('C', v);
+        };
+        
+        ND.getNumberData = function(v)
+        {
+            return this.filterDataOnSingleCoordinate('N', v);
+        };
+        
+        ND.Numbers = [
+            {
+                DisplayName: 'Singular',
+                ProgrammingName: 'singular',
+                Notes: []
+            },
+            {
+                DisplayName: 'Plural',
+                ProgrammingName: 'plural',
+                Notes: []
+            }
+        ];
+        
+        ND.setDisplay = function(value)
+        {
+            this.clearTable;
+            
+            var declensionSelect = document.getElementById('declension');
+            var caseSelect = document.getElementById('case');
+            var numberSelect = document.getElementById('number');
+            
+            if(value === 'declension')
+            {
+                declensionSelect.disabled = false;
+                
+                caseSelect.disabled = true;
+                caseSelect.value = '';
+                
+                numberSelect.disabled = true;
+                numberSelect.value = '';
+            }
+            else if(value === 'case')
+            {
+                declensionSelect.disabled = true;
+                declensionSelect.value = '';
+                
+                caseSelect.disabled = false;
+                
+                numberSelect.disabled = true;
+                numberSelect.value = '';
+            }
+            else if(value === 'number')
+            {
+                declensionSelect.disabled = true;
+                declensionSelect.value = '';
+                
+                caseSelect.disabled = true;
+                caseSelect.value = '';
+                
+                numberSelect.disabled = false;
+            }
+            else
+            {
+                declensionSelect.disabled = true;
+                declensionSelect.value = '';
+                
+                caseSelect.disabled = true;
+                caseSelect.value = '';
+                
+                numberSelect.disabled = true;
+                numberSelect.value = '';
+            }
+        }
+        
+        ND.setDisplayInfo = function(v)
+        {
+            this.DisplayInfoDiv.innerHTML = v;
+        }
+        
+        ND.showCaseData = function(v)
+        {
+            if(v == '')
+            {
+                this.clearTable();
+                return;
+            }
+            
+            var result = {};
+            
+            for(var i=0; i<this.Cases.length; i++)
+            {
+                if(this.Cases[i].ProgrammingName == v)
+                {
+                    var dCase = this.Cases[i];
+                    var data = this.getCaseData(v);
+                    
+                    result.Rows = [];
+                    
+                    //go through the declensions to create rows
+                    for(var j=0; j<this.Declensions.length; j++)
+                    {
+                        var row = {
+                            Label: this.Declensions[j].DisplayName,
+                            Data: []
+                        };
+                        
+                        for(var k=0; k<data.length; k++)
+                        {
+                            var datum = data[k];
+                            
+                            if(datum.D == this.Declensions[j].ProgrammingName)
+                            {
+                                var datumString = '';
+                                
+                                for(var l=0; l<datum.Endings.length; l++)
+                                {
+                                    if(l > 0)
+                                    {
+                                        datumString = datumString + ' / ';
+                                    }
+                                    
+                                    datumString = datumString + '-' + data[k].Endings[l];
+                                }
+                                
+                                row.Data.push(datumString);
+                            }
+                        }
+                        
+                        result.Rows.push(row);
+                    }
+                    
+                    var noteString = '<b>Notes:</b>' + "\n";
+                    noteString = noteString + '<ul>' + "\n";
+                    
+                    for(var j=0; j<dCase.Notes.length; j++)
+                    {
+                        noteString = noteString + '<li>' + dCase.Notes[j] + '</li>' + "\n";
+                    }
+                    
+                    noteString = noteString + '</ul>' + "\n";
+                    
+                    this.setDisplayInfo(noteString);
+                    
+                    break;
+                }
+            }
+            
+            if(typeof result.Rows !== 'undefined')
+            {
+                result.Columns = this.Numbers;
+                
+                this.buildTable(result);
+            }
+            else
+            {
+                alert('There is no case matching ' + v);
+            }
+        };
+        
+        ND.showDeclensionData = function(v)
+        {
+            if(v == '')
+            {
+                this.clearTable();
+                return;
+            }
+            
+            var result = {};
+            
+            for(var i=0; i<this.Declensions.length; i++)
+            {
+                if(this.Declensions[i].ProgrammingName == v)
+                {
+                    var declension = this.Declensions[i];
+                    var data = this.getDeclensionData(v);
+                    
+                    result.Rows = [];
+                    
+                    //go through the cases to create rows
+                    for(var j=0; j<this.Cases.length; j++)
+                    {
+                        var row = {
+                            Label: this.Cases[j].DisplayName,
+                            Data: []
+                        };
+                        
+                        for(var k=0; k<data.length; k++)
+                        {
+                            var datum = data[k];
+                            
+                            if(datum.C == this.Cases[j].ProgrammingName)
+                            {
+                                var datumString = '';
+                                
+                                for(var l=0; l<datum.Endings.length; l++)
+                                {
+                                    if(l > 0)
+                                    {
+                                        datumString = datumString + ' / ';
+                                    }
+                                    
+                                    datumString = datumString + '-' + data[k].Endings[l];
+                                }
+                                
+                                row.Data.push(datumString);
+                            }
+                        }
+                        
+                        result.Rows.push(row);
+                    }
+                    
+                    break;
+                }
+            }
+            
+            if(typeof result.Rows !== 'undefined')
+            {
+                result.Columns = this.Numbers;
+                
+                this.buildTable(result);
+            }
+            else
+            {
+                alert('There is no declension matching ' + v);
+            }
+        };
+        
+        ND.showNumberData = function(v)
+        {
+            if(v == '')
+            {
+                this.clearTable();
+                return;
+            }
+            
+            var result = {};
+            
+            for(var i=0; i<this.Cases.length; i++)
+            {
+                if(this.Numbers[i].ProgrammingName == v)
+                {
+                    var data = this.getNumberData(v);
+                    
+                    result.Rows = [];
+                    
+                    //go through the declensions to create rows
+                    for(var j=0; j<this.Declensions.length; j++)
+                    {
+                        var row = {
+                            Label: this.Cases[j].DisplayName,
+                            Data: []
+                        };
+                        
+                        for(var k=0; k<data.length; k++)
+                        {
+                            var datum = data[k];
+                            
+                            if(datum.C == this.Cases[j].ProgrammingName)
+                            {
+                                var datumString = '';
+                                
+                                for(var l=0; l<datum.Endings.length; l++)
+                                {
+                                    if(l > 0)
+                                    {
+                                        datumString = datumString + ' / ';
+                                    }
+                                    
+                                    datumString = datumString + '-' + data[k].Endings[l];
+                                }
+                                
+                                row.Data.push(datumString);
+                            }
+                        }
+                        
+                        result.Rows.push(row);
+                    }
+                    
+                    break;
+                }
+            }
+            
+            if(typeof result.Rows !== 'undefined')
+            {
+                result.Columns = this.Declensions;
+                
+                this.buildTable(result);
+            }
+            else
+            {
+                alert('There is no number matching ' + v);
+            }
+        };
+    }
+</script>
+</html>
