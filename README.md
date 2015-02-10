@@ -10,3 +10,5 @@ These programs are for the use of St Xavier High School Latin teachers
     - For tallying daily points from Moodle quizzes
 - Declension viewer (*declensionviewer*)
     - Shows different ways of looking at declensions, such as by case, as well as information pertinent to the chosen view
+- Test grader (*testgrader*)
+    - For grading tests, especially with varying point totals
