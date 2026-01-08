@@ -1,6 +1,22 @@
 import csv
 from datetime import datetime
 
+months = [
+	'', # here to make indices line up with month number
+	'January',
+	'February',
+	'March',
+	'April',
+	'May',
+	'June',
+	'July',
+	'August',
+	'September',
+	'October',
+	'November',
+	'December'
+]
+
 passing_score = 8
 
 file_to_read = "quizresults.csv"
@@ -43,11 +59,14 @@ with open(file_to_read, 'rU') as read_handle:
 		
 		current_student = students[student_key]
 		
-		completion_date_extracted = row[6].split(" ")[0]
-		completion_date_components = []
+		completion_date_components = [
+			str(months.index(row[4].split(" ")[1])),
+			str(row[4].split(" ")[0]),
+			str(row[4].split(" ")[2])[2:]
+		]
 		
-		for portion in completion_date_extracted.split("/"):
-			completion_date_components.append(portion.zfill(2))
+		for i in range(len(completion_date_components)):
+			completion_date_components[i] = completion_date_components[i].zfill(2)
 		
 		completion_date_reformatted = "/".join(completion_date_components)
 				
@@ -60,7 +79,7 @@ with open(file_to_read, 'rU') as read_handle:
 		current_student["quiz_results_by_date"][completion_date_key][0] += 1
 		current_student["quiz_results_by_date"][completion_date_key][2].append(row[8])
 		
-		if int(row[9]) >= passing_score:
+		if int(float(row[7])) >= passing_score:
 			current_student["quiz_results_by_date"][completion_date_key][1] += 1
 					
 		line_count += 1
@@ -90,12 +109,12 @@ with open(file_to_write, mode="w") as write_handle:
 			for duration in student["quiz_results_by_date"][date][2]:
 				duration_components = duration.split(" ")
 				if "min" in duration:
-					total_seconds += 60 * int(duration_components[0])
+					total_seconds += 60 * int(float(duration_components[0]))
 					
 					if "secs" in duration:
-						total_seconds += int(duration_components[2])
+						total_seconds += int(float(duration_components[2]))
 				else:
-					total_seconds += int(duration_components[0])
+					total_seconds += int(float(duration_components[0]))
 			
 			total_minutes = int(total_seconds / 60)
 			remainder_seconds = total_seconds % 60
