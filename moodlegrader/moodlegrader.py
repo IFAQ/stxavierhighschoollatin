@@ -1,8 +1,11 @@
-import numbers
 import csv
-import sys
+import tkinter
 from datetime import datetime
 from pathlib import Path
+from tkinter import filedialog
+import tkinter.filedialog
+
+tkinter.Tk().withdraw()
 
 months = [
 	'', # here to make indices line up with month number
@@ -22,8 +25,10 @@ months = [
 
 passing_score = 8
 
-file_to_read = Path(sys.argv[1])
-file_to_write = Path(str(file_to_read.parent) + "/results-" + file_to_read.stem + ".csv")
+file_to_read = tkinter.filedialog.askopenfile()
+file_to_read_path = Path(file_to_read.name)
+
+file_to_write = Path(str(file_to_read_path.parent) + "/results-" + file_to_read_path.stem + ".csv")
 
 current_student_first_name = None
 current_student_last_name = None
@@ -32,7 +37,7 @@ header_row = None
 
 students = {}
 
-with file_to_read.open() as read_handle:
+with file_to_read as read_handle:
 	csv_reader = csv.reader(read_handle, delimiter=",")
 	line_count = 0
 
@@ -49,7 +54,7 @@ with file_to_read.open() as read_handle:
 			continue
 		
 		# individual records
-		student_key = row[1] + ":" + row[0]
+		student_key = row[0].lower() + ":" + row[1].lower()
 		
 		if not(student_key in students):
 			new_student = {
@@ -92,7 +97,9 @@ with file_to_read.open() as read_handle:
 					
 		line_count += 1
 
-with file_to_write.open(mode="w") as write_handle:
+students = dict(sorted(students.items()))
+
+with file_to_write.open(mode="w", newline='') as write_handle:
 	result_writer = csv.writer(write_handle, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	
 	result_writer.writerow([
