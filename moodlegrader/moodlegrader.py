@@ -1,5 +1,8 @@
+import numbers
 import csv
+import sys
 from datetime import datetime
+from pathlib import Path
 
 months = [
 	'', # here to make indices line up with month number
@@ -19,8 +22,8 @@ months = [
 
 passing_score = 8
 
-file_to_read = "quizresults.csv"
-file_to_write = "graderesults.csv"
+file_to_read = Path(sys.argv[1])
+file_to_write = Path(str(file_to_read.parent) + "/results-" + file_to_read.stem + ".csv")
 
 current_student_first_name = None
 current_student_last_name = None
@@ -29,7 +32,7 @@ header_row = None
 
 students = {}
 
-with open(file_to_read, 'rU') as read_handle:
+with file_to_read.open() as read_handle:
 	csv_reader = csv.reader(read_handle, delimiter=",")
 	line_count = 0
 
@@ -79,12 +82,17 @@ with open(file_to_read, 'rU') as read_handle:
 		current_student["quiz_results_by_date"][completion_date_key][0] += 1
 		current_student["quiz_results_by_date"][completion_date_key][2].append(row[8])
 		
-		if int(float(row[7])) >= passing_score:
+		try:
+			attempt_score = int(float(row[7]))
+		except ValueError:
+			attempt_score = 0
+        	
+		if attempt_score >= passing_score:
 			current_student["quiz_results_by_date"][completion_date_key][1] += 1
 					
 		line_count += 1
 
-with open(file_to_write, mode="w") as write_handle:
+with file_to_write.open(mode="w") as write_handle:
 	result_writer = csv.writer(write_handle, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	
 	result_writer.writerow([
@@ -119,7 +127,7 @@ with open(file_to_write, mode="w") as write_handle:
 			total_minutes = int(total_seconds / 60)
 			remainder_seconds = total_seconds % 60
 			
-			average_duration = total_seconds / len(student["quiz_results_by_date"][date][2])
+			average_duration = round(total_seconds / len(student["quiz_results_by_date"][date][2]))
 			
 			average_minutes = int(average_duration / 60)
 			average_seconds = average_duration % 60
