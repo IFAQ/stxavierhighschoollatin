@@ -123,7 +123,9 @@ with file_to_write.open(mode="w", newline='') as write_handle:
 			
 			for duration in student["quiz_results_by_date"][date][2]:
 				duration_components = duration.split(" ")
-				if "min" in duration:
+				if "-" in duration:
+					pass
+				elif "min" in duration:
 					total_seconds += 60 * int(float(duration_components[0]))
 					
 					if "secs" in duration:
