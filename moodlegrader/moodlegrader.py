@@ -1,11 +1,8 @@
+import numbers
 import csv
-import tkinter
+import sys
 from datetime import datetime
 from pathlib import Path
-from tkinter import filedialog
-import tkinter.filedialog
-
-tkinter.Tk().withdraw()
 
 months = [
 	'', # here to make indices line up with month number
@@ -25,10 +22,8 @@ months = [
 
 passing_score = 8
 
-file_to_read = tkinter.filedialog.askopenfile()
-file_to_read_path = Path(file_to_read.name)
-
-file_to_write = Path(str(file_to_read_path.parent) + "/results-" + file_to_read_path.stem + ".csv")
+file_to_read = Path(sys.argv[1])
+file_to_write = Path(str(file_to_read.parent) + "/results-" + file_to_read.stem + ".csv")
 
 current_student_first_name = None
 current_student_last_name = None
@@ -37,7 +32,7 @@ header_row = None
 
 students = {}
 
-with file_to_read as read_handle:
+with file_to_read.open() as read_handle:
 	csv_reader = csv.reader(read_handle, delimiter=",")
 	line_count = 0
 
@@ -49,12 +44,12 @@ with file_to_read as read_handle:
 			continue
 		
 		# deal with empty rows (e.g., end)
-		if row[6] == "" or row[9] == "-":
+		if row[5] == "-" or row[6] == "" or row[9] == "-":
 			line_count += 1
 			continue
 		
 		# individual records
-		student_key = row[0].lower() + ":" + row[1].lower()
+		student_key = row[1] + ":" + row[0]
 		
 		if not(student_key in students):
 			new_student = {
@@ -68,9 +63,9 @@ with file_to_read as read_handle:
 		current_student = students[student_key]
 		
 		completion_date_components = [
-			str(months.index(row[4].split(" ")[1])),
-			str(row[4].split(" ")[0]),
-			str(row[4].split(" ")[2])[2:]
+			str(months.index(row[5].split(" ")[1])),
+			str(row[5].split(" ")[0]),
+			str(row[5].split(" ")[2])[2:]
 		]
 		
 		for i in range(len(completion_date_components)):
@@ -97,9 +92,7 @@ with file_to_read as read_handle:
 					
 		line_count += 1
 
-students = dict(sorted(students.items()))
-
-with file_to_write.open(mode="w", newline='') as write_handle:
+with file_to_write.open(mode="w") as write_handle:
 	result_writer = csv.writer(write_handle, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 	
 	result_writer.writerow([
