@@ -23,7 +23,7 @@ months = [
 passing_score = 8
 
 file_to_read = Path(sys.argv[1])
-file_to_write = Path(str(file_to_read.parent) + "/results-" + file_to_read.stem + ".csv")
+file_to_write = Path(str(file_to_read.parent) + "/" + file_to_read.stem + " Python.csv")
 
 current_student_first_name = None
 current_student_last_name = None
