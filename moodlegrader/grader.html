@@ -13,26 +13,27 @@
 		inputElement?.addEventListener('change', () => {
 		  const file = inputElement.files?.[0];
 		  if (!file) alert('no file!');
+		  
+		  const file_name_stem = file.name.split(".")[0];
 		
 		  const reader = new FileReader();
 		  reader.readAsText(file, 'UTF-8');
 		  reader.onload = function({ target }) {
 // 		  	resultPanel.textContent = target.result;
-			let months = [
-				'', // here to make indices line up with month number
-				'January',
-				'February',
-				'March',
-				'April',
-				'May',
-				'June',
-				'July',
-				'August',
-				'September',
-				'October',
-				'November',
-				'December'
-			];
+			let months = {
+				'January': 1,
+				'February': 2,
+				'March': 3,
+				'April': 4,
+				'May': 5,
+				'June': 6,
+				'July': 7,
+				'August': 8,
+				'September': 9,
+				'October': 10,
+				'November': 11,
+				'December': 12
+			};
 			
 			let passing_score = 8;
 			
@@ -54,8 +55,8 @@
 				let row = parse(lines[line_count]);
 				
 				// check for empty-ish rows
-				if (row[1] == "" || row[5] == "-" || row[6] == "" || row[9] == "-") {
-					console.debug('empty row');
+				if (row[0] == "" || row[1] == "" || row[5] == "-" || row[6] == "" || row[9] == "-") {
+					//console.debug('empty row');
 					continue;
 				}
 				
@@ -78,9 +79,9 @@
 				
 				// get the parts of the date and pad with zeroes
 				let completion_date_components = [
-					('0' + String(completion_date_split[1])).slice(-2), //month
+					('0' + String(months[completion_date_split[1]])).slice(-2), //month
 					('0' + String(completion_date_split[0])).slice(-2), //day
-					String(completion_date_split[2]) //year
+					('0' + String(completion_date_split[2])).slice(-2) //year
 				];
 				
 				let completion_date_key = completion_date_components.join("/");
@@ -89,8 +90,8 @@
 					current_student["quiz_results_by_date"][completion_date_key] = [0, 0, []];
 				}
 				
-				current_student["quiz_results_by_date"][completion_date_key][0] += 1
-				current_student["quiz_results_by_date"][completion_date_key][2].push(row[8])
+				current_student["quiz_results_by_date"][completion_date_key][0] += 1;
+				current_student["quiz_results_by_date"][completion_date_key][2].push(row[6]);
 				
 				let attempt_score = 0;
 				
@@ -101,10 +102,84 @@
 				}
 				
 				if (attempt_score >= passing_score) {
-					current_student["quiz_results_by_date"][completion_date_key][1] += 1
+					current_student["quiz_results_by_date"][completion_date_key][1] += 1;
 				}
 			}
+				
+				
+			// create the file string
+			let output_lines = [];
+			
+			output_lines.push([
+				"Last Name",
+				"First Name",
+				"Date",
+				"Attempts",
+				"Quality Scores",
+				"Total Time",
+				"Average Time"
+			].join(","));
+			
+			for (const [student_key, student] of Object.entries(students)) {
+				
+				for (const [date, results] of Object.entries(student["quiz_results_by_date"])) {
+					// console.debug(results);
+					attempt_counter = results[0];
+					pass_counter = results[1];
+					
+					let total_seconds = 0;
+					
+					for (const [key, duration] of Object.entries(results[2])) {
+						console.debug(duration);
+						let duration_components = duration.split(" ");
+						
+						if (duration.includes("-")) {
+							
+						} else if (duration.includes("min")) {
+							total_seconds += 60 * parseInt(duration_components[0]);
+							
+							if (duration.includes("secs")) {
+								total_seconds += parseInt(duration_components[2]);
+							}
+						} else {
+							total_seconds += parseInt(duration_components[0]);
+						}
+					}
+					
+					let total_minutes = parseInt(total_seconds / 60);
+					let remainder_seconds = total_seconds % 60;
+					
+					let average_duration = Math.round(total_seconds / results[2].length);
+					
+					let average_minutes = parseInt(average_duration / 60);
+					let average_seconds = average_duration % 60;
+					
+					output_lines.push([
+						student["last_name"],
+						student["first_name"],
+						date,
+						attempt_counter,
+						pass_counter,
+						String(total_minutes) + ":" + ('0' + String(remainder_seconds)).slice(-2),
+						String(average_minutes) + ":" + ('0' + String(average_seconds)).slice(-2)
+					].join(","));
+					
+					// print(student["last_name"], student["first_name"], date, attempt_counter, pass_counter, str(total_minutes) + ":" + str(remainder_seconds).zfill(2), str(average_minutes) + ":" + str(average_seconds).zfill(2))
+				}
+			}
+			
+			// generate the file
+			let textblob = new Blob([output_lines.join("\n")], { type: 'text/csv' });
+			let dwnlnk = document.createElement('a');
+			dwnlnk.download = file_name_stem + ' Python.csv';
+			if (window.webkitURL != null) {
+				dwnlnk.href = window.webkitURL.createObjectURL(textblob);
+			} else {
+				dwnlnk.href = window.URL.createObjectURL(textblob);
+			}
+			dwnlnk.click();
 		  }
+		  
 		  reader.onerror = function() {
 			resultPanel.textContent = 'error reading file';
 		  }
