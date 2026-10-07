@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	
+</head>
+<body>
+	<input type="file" id="files">
+	<pre id="fileContents"></pre>
+	<script>
+		const resultPanel = document.getElementById('fileContents');
+		const inputElement = document.getElementById('files');
+		
+		inputElement?.addEventListener('change', () => {
+		  const file = inputElement.files?.[0];
+		  if (!file) alert('no file!');
+		
+		  const reader = new FileReader();
+		  reader.readAsText(file, 'UTF-8');
+		  reader.onload = function({ target }) {
+// 		  	resultPanel.textContent = target.result;
+			let months = [
+				'', // here to make indices line up with month number
+				'January',
+				'February',
+				'March',
+				'April',
+				'May',
+				'June',
+				'July',
+				'August',
+				'September',
+				'October',
+				'November',
+				'December'
+			];
+			
+			let passing_score = 8;
+			
+			let current_student_first_name = null;
+			let current_student_last_name = null;
+			
+			let header_row = null;
+			
+			let students = {};
+			
+// 			console.debug(target.result);
+
+			let lines = target.result.split('\n');
+			
+// 			console.debug(lines);
+
+			// skip the first row for processing
+			for(let line_count=1; line_count<lines.length; line_count++) {
+				let row = parse(lines[line_count]);
+				
+				// check for empty-ish rows
+				if (row[5] == "-" || row[6] == "" || row[9] == "-") {
+					console.debug('empty row');
+					continue;
+				}
+				
+				let student_key = row[1] + ":" + row[0];
+				console.debug(student_key);
+				
+				if (!(student_key in students)) {
+					students[student_key] = {
+						"first_name": row[1],
+						"last_name": row[0],
+						"quiz_results_by_date": {}
+					};
+				}
+				
+				let current_student = students[student_key];
+				console.debug(current_student);
+			}
+			
+			
+			
+			// with file_to_read.open() as read_handle:
+// 					
+// 					completion_date_components = [
+// 						str(months.index(row[5].split(" ")[1])),
+// 						str(row[5].split(" ")[0]),
+// 						str(row[5].split(" ")[2])[2:]
+// 					]
+// 					
+// 					for i in range(len(completion_date_components)):
+// 						completion_date_components[i] = completion_date_components[i].zfill(2)
+// 					
+// 					completion_date_reformatted = "/".join(completion_date_components)
+// 							
+// 					completion_date = datetime.strptime(completion_date_reformatted, "%m/%d/%y")
+// 					completion_date_key = completion_date.strftime("%m/%d/%Y")
+// 					
+// 					if not(completion_date_key in current_student["quiz_results_by_date"]):
+// 						current_student["quiz_results_by_date"][completion_date_key] = [0, 0, []]
+// 					
+// 					current_student["quiz_results_by_date"][completion_date_key][0] += 1
+// 					current_student["quiz_results_by_date"][completion_date_key][2].append(row[8])
+// 					
+// 					try:
+// 						attempt_score = int(float(row[7]))
+// 					except ValueError:
+// 						attempt_score = 0
+// 						
+// 					if attempt_score >= passing_score:
+// 						current_student["quiz_results_by_date"][completion_date_key][1] += 1
+// 								
+// 					line_count += 1
+
+		  }
+		  reader.onerror = function() {
+			resultPanel.textContent = 'error reading file';
+		  }
+		});
+		
+		function parse(row){
+			var insideQuote = false,                                             
+			  entries = [],                                                    
+			  entry = [];
+			
+			row.split('').forEach(function (character) {                         
+				if(character === '"') {
+				  insideQuote = !insideQuote;                                      
+				} else {
+				  if(character == "," && !insideQuote) {                           
+					entries.push(entry.join(''));                                  
+					entry = [];                                                    
+				  } else {
+					entry.push(character);                                         
+				  }                                                                
+				}                                                                  
+			});
+			
+			entries.push(entry.join(''));
+			
+			return entries;                                                      
+		}
+
+	</script>
+</body>
+</html>
